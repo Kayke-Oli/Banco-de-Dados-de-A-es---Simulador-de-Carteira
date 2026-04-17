@@ -3,4 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cassert>
+
+int main(){
     
+}
