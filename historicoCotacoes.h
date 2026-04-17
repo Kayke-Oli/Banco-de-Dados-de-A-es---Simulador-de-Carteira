@@ -1,0 +1,4 @@
+#ifndef HISTORICO_COTACOES_H
+#define HISTORICO_COTACOES_H
+
+#endif

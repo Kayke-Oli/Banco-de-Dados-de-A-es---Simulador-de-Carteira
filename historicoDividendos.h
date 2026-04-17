@@ -1,0 +1,4 @@
+#ifndef HISTORICO_DIVIDENDOS_H
+#define HISTORICO_DIVIDENDOS_H
+
+#endif
