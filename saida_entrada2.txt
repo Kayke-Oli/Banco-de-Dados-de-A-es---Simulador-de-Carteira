@@ -1,0 +1,18 @@
+Data: 12/01/2023
+Ticker Quantidade        Compra     Dividendo         Valor
+bbas3          10       1000.00        200.12        200.00
+bbse3           4       1000.00        300.75        160.00
+Valor total da carteira:                             360.00
+
+Dados do aporte:
+Ticker Quantidade         Valor
+bbas3           1         20.00
+bbse3           2         80.00
+Total aportado:          100.00
+
+Data: 12/01/2023
+Ticker Quantidade        Compra     Dividendo         Valor
+bbas3          11       1020.00        200.12        220.00
+bbse3           6       1080.00        300.75        240.00
+Valor total da carteira:                             460.00
+
