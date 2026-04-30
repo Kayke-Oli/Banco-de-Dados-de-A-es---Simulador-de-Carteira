@@ -197,7 +197,7 @@ void MyVec<T>::mergeSort(Comparator cmp) {
     if (_dataSize <= 1) 
         return;
     T* aux = new T[_dataSize];
-    _mergeSortAux(aux, 0, _dataSize - 1, cmp);
+    _mergeSortAux(0, _dataSize - 1, cmp);
     delete[] aux;
 }
  
