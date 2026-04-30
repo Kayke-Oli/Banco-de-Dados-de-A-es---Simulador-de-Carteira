@@ -63,6 +63,7 @@ public:
     void reserve(int newCapacity);
     template <class Comparator>
     void mergeSort(Comparator cmp);
+    void remove(int pos);
 };
 
 template <class T>
@@ -162,6 +163,14 @@ void MyVec<T>::reserve(int newCapacity) {
 		_data[i] = oldData[i];
 	delete []oldData;
 	_dataCapacity = newCapacity;
+}
+
+template <class T>
+void MyVec<T>::remove(int pos){
+    assert(pos>=0 && pos<=_dataSize);
+    for(int i=pos;i<=_dataSize-1;i++)
+        _data[i] = _data[i+1];
+    _dataSize--;
 }
 
 template<class T>
