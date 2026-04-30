@@ -60,6 +60,7 @@ public:
     void clear();
     bool empty() const;
     int size() const;
+    int capacity() const;
     void reserve(int newCapacity);
     template <class Comparator>
     void mergeSort(Comparator cmp);
@@ -137,6 +138,11 @@ bool MyVec<T>::empty() const{
 template <class T>
 int MyVec<T>::size() const{
     return _dataSize;
+}
+
+template <class T>
+int MyVec<T>::capacity() const{
+    return _dataCapacity;
 }
 
 template <class T>
