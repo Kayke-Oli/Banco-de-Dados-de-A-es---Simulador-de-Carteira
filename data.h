@@ -20,6 +20,8 @@ public:
     bool operator<=(const Data& outro) const;
     bool operator>(const Data& outro) const;
     bool operator==(const Data& outro) const;
-    void imprime() const;
+    bool operator!=(const Data& outro) const;
+    friend std::istream& operator>>(std::istream& in, Data& d);
+    friend std::ostream& operator<<(std::ostream& out, const Data& d);
 };
 #endif

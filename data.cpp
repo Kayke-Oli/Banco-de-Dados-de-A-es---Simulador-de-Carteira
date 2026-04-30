@@ -48,6 +48,17 @@ bool Data::operator==(const Data& outro) const{
     return to_int() == outro.to_int();
 }
 
-void Data::imprime() const{
-    std::cout << std::setfill('0') << std::setw(2) << _dia << "/" << std::setw(2) << _mes << "/" << std::setw(4) << _ano;
+bool Data::operator!=(const Data& outro) const{
+    return to_int() != outro.to_int();
+}
+
+std::istream& operator>>(std::istream& in, Data& d) {
+    char sep;
+    in >> d._dia >> sep >> d._mes >> sep >> d._ano;
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Data& d) {
+    out << std::setfill('0') << std::setw(2) << d._dia << '/' << std::setw(2) << d._mes << '/' << std::setw(4) << d._ano;
+    return out;
 }
