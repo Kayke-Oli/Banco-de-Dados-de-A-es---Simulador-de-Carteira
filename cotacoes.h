@@ -29,8 +29,8 @@ public:
     int buscaBinaria(const Data& data) const;
     int primeiro(const Data& firstData) const;
     int ultimo(const Data& lastData) const;
-    int get_tamanho() const;
-    const RegistroCotacao& get_registro(int res) const;
+    int get_tamanho() const { return _registros.size();};
+    const RegistroCotacao& get_registro(int res) const { return _registros[res];};
 };
 
 //Banco completo de cotações
@@ -40,9 +40,9 @@ private:
     CotacaoTicker* buscar_criar(const std::string& ticker);
 public:
     Cotacao();
-    double ler(int n);
+    void ler(int n);
     void ordenarTodos();
-    CotacaoTicker* buscarTicker(const std::string& ticker) const;
+    const CotacaoTicker* buscarTicker(const std::string& ticker) const;
 };
 
 #endif
