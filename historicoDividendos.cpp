@@ -3,8 +3,6 @@
 #include <iostream>
 #include <cassert>
 
-RegistroDividendo::RegistroDividendo() : valor(0) {}
-
 DividendoTicker::DividendoTicker() : _ticker("") {}
 
 DividendoTicker::DividendoTicker(const std::string& ticker) : _ticker(ticker) {}

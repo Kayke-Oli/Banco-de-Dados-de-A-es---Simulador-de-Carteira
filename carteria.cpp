@@ -3,8 +3,6 @@
 #include <iostream>
 #include <iomanip>
 
-Acao::Acao() : quantidade(0), custoTotal(0), dividendoAcumulado(0) {}
-
 Carteira::Carteira() {}
 
 // Busca uma ação pelo ticker; retorna nullptr se não encontrar
@@ -40,7 +38,11 @@ void Carteira::valor(const std::string& ticker, const Data& data, const Cotacao&
         std::cout << "Cotacao nao encontrada para " << ticker << " em " << data << ".\n";
         return;
     }
-    const Acao* a = buscar(ticker);
+    const Acao* a = nullptr;
+    for (int i = 0; i < _acoes.size(); i++)
+        if (_acoes[i].ticker == ticker){ 
+            a = &_acoes[i]; 
+            break;}
     if (a == nullptr) {
         std::cout << "Acao " << ticker << " nao encontrada na carteira.\n";
         return;
@@ -61,7 +63,11 @@ void Carteira::valorFast(const std::string& ticker, const Data& data, const Cota
         std::cout << "Cotacao nao encontrada para " << ticker << " em " << data << ".\n";
         return;
     }
-    const Acao* a = buscar(ticker);
+    const Acao* a = nullptr;
+    for (int i = 0; i < _acoes.size(); i++)
+        if (_acoes[i].ticker == ticker){ 
+            a = &_acoes[i]; 
+            break;}
     if (a == nullptr) {
         std::cout << "Acao " << ticker << " nao encontrada na carteira.\n";
         return;
@@ -97,7 +103,11 @@ void Carteira::mimax(const std::string& ticker, const Data& inicio, const Data& 
 
 // Soma os dividendos do ticker no intervalo [inicio, fim]
 void Carteira::dividendo(const std::string& ticker, const Data& inicio, const Data& fim, const HistoricoDividendo& hist) const {
-    const Acao* a = buscar(ticker);
+    const Acao* a = nullptr;
+    for (int i = 0; i < _acoes.size(); i++)
+        if (_acoes[i].ticker == ticker){ 
+            a = &_acoes[i]; 
+            break;}
     if (a == nullptr) {
         std::cout << "Acao " << ticker << " nao encontrada na carteira.\n";
         return;
@@ -130,6 +140,13 @@ void Carteira::ordenar(const std::string& criterio) {
             return a.dividendoAcumulado < b.dividendoAcumulado;
         });
     }
+    else if (criterio == "dividendoticker") {
+    _acoes.mergeSort([](const Acao& a, const Acao& b) {
+        if (a.dividendoAcumulado != b.dividendoAcumulado)
+            return a.dividendoAcumulado > b.dividendoAcumulado;
+        return a.ticker < b.ticker;
+    });
+}
 }
 
 // Adiciona uma compra à carteira

@@ -59,6 +59,11 @@ std::istream& operator>>(std::istream& in, Data& d) {
 }
 
 std::ostream& operator<<(std::ostream& out, const Data& d) {
-    out << std::setfill('0') << std::setw(2) << d._dia << '/' << std::setw(2) << d._mes << '/' << std::setw(4) << d._ano;
+    if (d._dia < 10) 
+        out << '0';
+    out << d._dia << '/';
+    if (d._mes < 10) 
+        out << '0';
+    out << d._mes << '/' << d._ano;
     return out;
 }

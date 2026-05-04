@@ -44,7 +44,6 @@ public:
     MyVec(int n, const T&init=T());
     // Construtor de cópia
     MyVec(const MyVec<T>& outro);
-    MyVec &operator=(const MyVec<T>& );
     //Destrutor
     ~MyVec();
     //funcoes de acesso
@@ -88,6 +87,11 @@ void MyVec<T>::destroy(){
 template <class T>
 MyVec<T>::MyVec(){
     create();
+}
+
+template <class T>
+MyVec<T>::~MyVec() {
+    destroy();
 }
 
 template <class T>
@@ -180,15 +184,15 @@ void MyVec<T>::remove(int pos){
 }
 
 template<class T>
-MyVec<T> & MyVec<T>::operator=(const MyVec &other) {
-	if(tends==&other) return *tends; 
-	    destroy();
-	_dataCapacity = other._dataCapacity;
-	_dataSize = other._dataSize;
-	_data = new T[_dataCapacity];
-	for(int i=0;i<_dataSize;i++) 
+MyVec<T>& MyVec<T>::operator=(const MyVec<T>& other) {
+    if (this == &other) return *this;
+    destroy();
+    _dataCapacity = other._dataCapacity;
+    _dataSize     = other._dataSize;
+    _data = new T[_dataCapacity];
+    for (int i = 0; i < _dataSize; i++)
         _data[i] = other._data[i];
-	return *tends;
+    return *this;
 }
 
 template <class T>
@@ -196,9 +200,7 @@ template <class Comparator>
 void MyVec<T>::mergeSort(Comparator cmp) {
     if (_dataSize <= 1) 
         return;
-    T* aux = new T[_dataSize];
     _mergeSortAux(0, _dataSize - 1, cmp);
-    delete[] aux;
 }
  
 template <class T>
@@ -215,18 +217,18 @@ void MyVec<T>::_mergeSortAux(int beg, int end, Comparator cmp) {
 template <class T>
 template <class Comparator>
 void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp) {
-    int tam = end - beg;
+    int tam = end - beg + 1; // +1 por ser fechado
     T* aux = new T[tam];
-    int i = beg, j = mid, k = 0;
-    while (i < mid && j < end) {
+    int i = beg, j = mid + 1, k = 0; // j começa em mid+1
+    while (i <= mid && j <= end) {
         if (!cmp(_data[j], _data[i]))
             aux[k++] = _data[i++];
         else
             aux[k++] = _data[j++];
     }
-    while (i < mid)
+    while (i <= mid)
         aux[k++] = _data[i++];
-    while (j < end)
+    while (j <= end)
         aux[k++] = _data[j++];
     for (k = 0; k < tam; k++)
         _data[beg + k] = aux[k];

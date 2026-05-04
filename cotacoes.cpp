@@ -2,8 +2,6 @@
 #include "cotacoes.h"
 #include <cassert>
 
-RegistroCotacao::RegistroCotacao() : preco(0){}
-
 CotacaoTicker::CotacaoTicker() : _ticker(""){}
 
 CotacaoTicker::CotacaoTicker(const std::string& ticker) : _ticker(ticker) {}

@@ -9,9 +9,9 @@
 
 struct Acao {
     std::string ticker;
-    int quantidade;
-    int custoTotal;      // em centavos
-    int dividendoAcumulado; // em centavos
+    int quantidade = 0;
+    int custoTotal = 0;
+    int dividendoAcumulado = 0;
 };
 
 class Carteira {

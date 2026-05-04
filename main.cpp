@@ -190,25 +190,31 @@ int main() {
             MyVec<int> qtdComprada(carteira.tamanho()); // inicializado com 0
 
             // Algoritmo: compra 1 ação da empresa com menor valor total
+            int tamOriginal = carteira.tamanho();
             while (true) {
                 // Encontra a empresa com menor valor (empate: ticker menor)
-                int idx = -1;
+                int idx = 0;
                 for (int i = 0; i < carteira.tamanho(); i++) {
-                    if (saldo < precos[i]) continue; // não tem saldo suficiente
-                    if (idx == -1 || valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
+                    if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
                         idx = i;
                     }
                 }
+                if(saldo < precos[idx])
+                    break;
                 // Nenhuma empresa pode ser comprada
-                if (idx == -1) break;
+                if (idx == -1) 
+                    break;
                 // Verifica se saldo é suficiente para comprar a de menor valor
-                if (saldo < precos[idx]) break;
+                if (saldo < precos[idx]) 
+                    break;
 
                 // Compra 1 ação
                 saldo -= precos[idx];
                 valoresAtual[idx] += precos[idx];
                 qtdComprada[idx]++;
                 carteira.aporte(carteira.get(idx).ticker, 1, precos[idx]);
+
+                
             }
 
             // Imprime detalhes do aporte
@@ -217,8 +223,9 @@ int main() {
                 std::cout << "Dados do aporte:\n";
                 std::cout << std::left << std::setw(10) << "Ticker" << std::setw(12) << "Quantidade" << "Valor" << '\n';
             }
-            for (int i = 0; i < carteira.tamanho(); i++) {
-                if (qtdComprada[i] == 0) continue;
+            for (int i = 0; i < tamOriginal; i++) {
+                if (qtdComprada[i] == 0) 
+                    continue;
                 int valorCompra = qtdComprada[i] * precos[i];
                 totalAportado += valorCompra;
                 if (!compacta) {
