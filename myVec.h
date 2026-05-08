@@ -217,9 +217,9 @@ void MyVec<T>::_mergeSortAux(int beg, int end, Comparator cmp) {
 template <class T>
 template <class Comparator>
 void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp) {
-    int tam = end - beg + 1; // +1 por ser fechado
+    int tam = end - beg + 1;
     T* aux = new T[tam];
-    int i = beg, j = mid + 1, k = 0; // j começa em mid+1
+    int i = beg, j = mid + 1, k = 0;
     while (i <= mid && j <= end) {
         if (!cmp(_data[j], _data[i]))
             aux[k++] = _data[i++];

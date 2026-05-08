@@ -1,6 +1,6 @@
 #ifndef CARTEIRA_H
 #define CARTEIRA_H
-#include "MyVec.h"
+#include "myVec.h"
 #include "data.h"
 #include "cotacoes.h"
 #include "historicoDividendos.h"
