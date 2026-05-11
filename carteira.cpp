@@ -129,11 +129,11 @@ void Carteira::ordenar(const std::string& criterio) {
         });
     } else if (criterio == "quantidade") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
-            return a.quantidade < b.quantidade;
+            return a.quantidade > b.quantidade;
         });
     } else if (criterio == "custo") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
-            return a.custoTotal < b.custoTotal;
+            return a.custoTotal > a.custoTotal;
         });
     } else if (criterio == "dividendo") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
