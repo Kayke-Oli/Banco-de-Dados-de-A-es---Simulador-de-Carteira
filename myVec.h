@@ -222,9 +222,9 @@ void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp) {
     int i = beg, j = mid + 1, k = 0;
     while (i <= mid && j <= end) {
         if (cmp(_data[j], _data[i]))
-            aux[k++] = _data[i++];
-        else
             aux[k++] = _data[j++];
+        else
+            aux[k++] = _data[i++];
     }
     while (i <= mid)
         aux[k++] = _data[i++];

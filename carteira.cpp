@@ -141,19 +141,11 @@ void Carteira::ordenar(const std::string& criterio) {
         });
     }
     else if (criterio == "dividendoticker") {
-    std::cerr << "--- ANTES dividendoticker ---\n";
-    for (int i = 0; i < _acoes.size(); i++)
-        std::cerr << _acoes[i].ticker << " div=" << _acoes[i].dividendoAcumulado << "\n";
-
-    _acoes.mergeSort([](const Acao& a, const Acao& b) {
+        _acoes.mergeSort([](const Acao& a, const Acao& b) {
         if (a.dividendoAcumulado != b.dividendoAcumulado)
             return a.dividendoAcumulado > b.dividendoAcumulado;
         return a.ticker < b.ticker;
     });
-
-    std::cerr << "--- DEPOIS dividendoticker ---\n";
-    for (int i = 0; i < _acoes.size(); i++)
-        std::cerr << _acoes[i].ticker << " div=" << _acoes[i].dividendoAcumulado << "\n";
 }
 }
 
