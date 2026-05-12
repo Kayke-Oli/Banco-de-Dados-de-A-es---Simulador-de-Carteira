@@ -127,26 +127,28 @@ void Carteira::ordenar(const std::string& criterio) {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
             return a.ticker < b.ticker;
         });
+    } else if (criterio == "preco") {
+        _acoes.mergeSort([](const Acao& a, const Acao& b) {
+            if (a.custoTotal != b.custoTotal)
+                return a.custoTotal > b.custoTotal;
+            return a.ticker < b.ticker;  
+        });
     } else if (criterio == "quantidade") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
-            return a.quantidade > b.quantidade;
+            return a.quantidade > b.quantidade;  
         });
-    } else if (criterio == "preco") {
-    _acoes.mergeSort([](const Acao& a, const Acao& b) {
-        return a.custoTotal > b.custoTotal;
-    });
     } else if (criterio == "dividendo") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
-            return a.dividendoAcumulado < b.dividendoAcumulado;
+            return a.dividendoAcumulado > b.dividendoAcumulado;  
+        });
+    } else if (criterio == "dividendoticker") {
+        _acoes.mergeSort([](const Acao& a, const Acao& b) {
+            if (a.dividendoAcumulado != b.dividendoAcumulado)
+                return a.dividendoAcumulado > b.dividendoAcumulado;
+            return a.ticker < b.ticker;  
         });
     }
-    else if (criterio == "dividendoticker") {
-        _acoes.mergeSort([](const Acao& a, const Acao& b) {
-        if (a.dividendoAcumulado != b.dividendoAcumulado)
-            return a.dividendoAcumulado > b.dividendoAcumulado;
-        return a.ticker < b.ticker;
-    });
-}}
+}
 
 // Adiciona uma compra à carteira
 void Carteira::aporte(const std::string& ticker, int quantidade, int preco) {
