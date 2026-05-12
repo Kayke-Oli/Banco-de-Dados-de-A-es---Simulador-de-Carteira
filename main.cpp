@@ -175,7 +175,7 @@ int main() {
                         idx = i;
                     }
                 }
-                if (saldo < precos[idx])
+                if (saldo < precos[idx] || precos[idx] <= 0)
                     break;
                 saldo -= precos[idx];
                 valoresAtual[idx] += precos[idx];
