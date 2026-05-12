@@ -102,9 +102,10 @@ MyVec<T>::MyVec(int n, const T&init){
 }
 
 template <class T>
-MyVec<T>::MyVec(const MyVec<T>&outro) : _data(new T[outro._dataSize]), _dataSize(outro._dataSize), _dataCapacity(outro._dataCapacity){
+MyVec<T>::MyVec(const MyVec<T>&outro) : _data(new T[outro._dataCapacity]), _dataSize(outro._dataSize), _dataCapacity(outro._dataCapacity){
     for (int i = 0; i < _dataSize; ++i)
-        _data[i] = outro._data[i];}
+        _data[i] = outro._data[i];
+}
 
 template <class T>
 void MyVec<T>::push_back(const T&elem){

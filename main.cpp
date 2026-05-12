@@ -181,19 +181,22 @@ int main() {
             MyVec<int> qtdComprada(carteira.tamanho());
 
             int tamOriginal = carteira.tamanho();
+            if (tamOriginal == 0) 
+                continue; 
+
             while (true) {
                 int idx = 0;
-                for (int i = 0; i < carteira.tamanho(); i++) {
+                for (int i = 1; i < carteira.tamanho(); i++) { 
                     if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
                         idx = i;
                     }
                 }
                 if (saldo < precos[idx] || precos[idx] <= 0)
                     break;
+                
                 saldo -= precos[idx];
                 valoresAtual[idx] += precos[idx];
                 qtdComprada[idx]++;
-                carteira.aporte(carteira.get(idx).ticker, 1, precos[idx]);
             }
 
             int totalAportado = 0;
@@ -201,14 +204,18 @@ int main() {
                 std::cout << "Dados do aporte:\n";
                 std::cout << std::left  << std::setw(7)  << "Ticker" << std::right << std::setw(10) << "Quantidade" << std::right << std::setw(14) << "Valor" << '\n';
             }
+
             for (int i = 0; i < tamOriginal; i++) {
                 if (qtdComprada[i] == 0) 
                     continue;
+                
                 int valorCompra = qtdComprada[i] * precos[i];
                 totalAportado += valorCompra;
+                
+                carteira.aporte(carteira.get(i).ticker, qtdComprada[i], precos[i]);
+                
                 if (!compacta) {
-                    std::cout << std::left  << std::setw(7)  << carteira.get(i).ticker << std::right << std::setw(10) << qtdComprada[i]
-                              << std::fixed << std::setprecision(2) << std::right << std::setw(14) << valorCompra / 100.0 << '\n';
+                    std::cout << std::left  << std::setw(7)  << carteira.get(i).ticker << std::right << std::setw(10) << qtdComprada[i] << std::fixed << std::setprecision(2) << std::right << std::setw(14) << valorCompra / 100.0 << '\n';
                 }
             }
             if (!compacta) {
