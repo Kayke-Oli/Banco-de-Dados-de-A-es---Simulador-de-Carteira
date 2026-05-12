@@ -86,16 +86,27 @@ int DividendoTicker::somatorio(const Data &inicio, const Data &fim) const
 
 HistoricoDividendo::HistoricoDividendo() {}
 
-// Busca o ticker no vetor; se não existir, cria e retorna ponteiro para ele
 int HistoricoDividendo::buscar_criar(const std::string &ticker)
 {
-    for (int i = 0; i < _tickers.size(); i++)
+    int lo = 0, hi = _tickers.size() - 1;
+    while (lo <= hi)
     {
-        if (_tickers[i].get_ticker() == ticker)
-            return i;
+        int mid = lo + (hi - lo) / 2;
+        if (_tickers[mid].get_ticker() == ticker)
+        {
+            return mid;
+        }
+        else if (_tickers[mid].get_ticker() < ticker)
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid - 1;
+        }
     }
-    _tickers.push_back(DividendoTicker(ticker));
-    return _tickers.size() - 1;
+    _tickers.insert(lo, DividendoTicker(ticker));
+    return lo;
 }
 
 void HistoricoDividendo::ler(int n)
@@ -132,10 +143,22 @@ void HistoricoDividendo::ordenarTodos()
 // Busca um ticker no vetor; retorna nullptr se não encontrar
 const DividendoTicker *HistoricoDividendo::buscarTicker(const std::string &ticker) const
 {
-    for (int i = 0; i < _tickers.size(); i++)
+    int lo = 0, hi = _tickers.size() - 1;
+    while (lo <= hi)
     {
-        if (_tickers[i].get_ticker() == ticker)
-            return &_tickers[i];
+        int mid = lo + (hi - lo) / 2;
+        if (_tickers[mid].get_ticker() == ticker)
+        {
+            return &_tickers[mid];
+        }
+        else if (_tickers[mid].get_ticker() < ticker)
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid - 1;
+        }
     }
     return nullptr;
 }

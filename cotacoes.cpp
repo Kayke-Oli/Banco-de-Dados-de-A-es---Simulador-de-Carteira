@@ -85,13 +85,25 @@ int CotacaoTicker::ultimo(const Data &lastData) const
 
 int Cotacao::buscar_criar(const std::string &ticker)
 {
-    for (int i = 0; i < _tickers.size(); i++)
+    int lo = 0, hi = _tickers.size() - 1;
+    while (lo <= hi)
     {
-        if (_tickers[i].get_ticker() == ticker)
-            return i;
+        int mid = lo + (hi - lo) / 2;
+        if (_tickers[mid].get_ticker() == ticker)
+        {
+            return mid;
+        }
+        else if (_tickers[mid].get_ticker() < ticker)
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid - 1;
+        }
     }
-    _tickers.push_back(CotacaoTicker(ticker));
-    return _tickers.size() - 1;
+    _tickers.insert(lo, CotacaoTicker(ticker));
+    return lo;
 }
 
 void Cotacao::ler(int n)
@@ -125,10 +137,22 @@ void Cotacao::ordenarTodos()
 // Busca um ticker no vetor;
 const CotacaoTicker *Cotacao::buscarTicker(const std::string &ticker) const
 {
-    for (int i = 0; i < _tickers.size(); i++)
+    int lo = 0, hi = _tickers.size() - 1;
+    while (lo <= hi)
     {
-        if (_tickers[i].get_ticker() == ticker)
-            return &_tickers[i];
+        int mid = lo + (hi - lo) / 2;
+        if (_tickers[mid].get_ticker() == ticker)
+        {
+            return &_tickers[mid];
+        }
+        else if (_tickers[mid].get_ticker() < ticker)
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid - 1;
+        }
     }
     return nullptr;
 }

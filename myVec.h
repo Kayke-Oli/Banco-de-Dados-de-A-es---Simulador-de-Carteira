@@ -165,7 +165,9 @@ void MyVec<T>::insert(int pos, const T &elem)
             reserve(_dataCapacity * 2);
     }
     for (int i = _dataSize; i > pos; i--)
-        _data[i] = _data[i - 1];
+    {
+        _data[i] = std::move(_data[i - 1]);
+    }
     _data[pos] = elem;
     _dataSize++;
 }
