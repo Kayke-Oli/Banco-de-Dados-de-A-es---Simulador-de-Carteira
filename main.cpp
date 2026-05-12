@@ -176,7 +176,7 @@ int main() {
             int saldo = valorAporteD * 100 + 0.5;
 
             int tamOriginal = carteira.tamanho();
-            if (tamOriginal == 0) continue; // Trava contra KILL SIGNAL se a carteira for vazia
+            if (tamOriginal == 0) continue; 
 
             MyVec<int> precos;
             for (int i = 0; i < tamOriginal; i++) {
@@ -191,28 +191,51 @@ int main() {
             MyVec<int> valoresAtual;
             for (int i = 0; i < tamOriginal; i++) {
                 if (precos[i] <= 0) {
-                    valoresAtual.push_back(INF); // Cega o algoritmo para não comprar ações sem cotação
+                    valoresAtual.push_back(INF);
                 } else {
                     valoresAtual.push_back(precos[i] * carteira.get(i).quantidade);
                 }
             }
 
             MyVec<int> qtdComprada(tamOriginal);
-
             while (true) {
-                int idx = 0;
-                for (int i = 1; i < tamOriginal; i++) {
-                    if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
+                int idx = -1;
+                int next_idx = -1;
+                for (int i = 0; i < tamOriginal; i++) {
+                    if (precos[i] <= 0 || valoresAtual[i] == INF)
+                        continue;
+                    if (idx == -1) {
                         idx = i;
+                    } else if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
+                        next_idx = idx;
+                        idx = i;
+                    } else if (next_idx == -1) {
+                        next_idx = i;
+                    } else if (valoresAtual[i] < valoresAtual[next_idx] || (valoresAtual[i] == valoresAtual[next_idx] && carteira.get(i).ticker < carteira.get(next_idx).ticker)) {
+                        next_idx = i;
                     }
                 }
-                // Se o menor valor encontrado for INF, significa que não há ações válidas para comprar
-                if (saldo < precos[idx] || precos[idx] <= 0 || valoresAtual[idx] == INF)
+                if (idx == -1 || saldo < precos[idx])
                     break;
-                
-                saldo -= precos[idx];
-                valoresAtual[idx] += precos[idx];
-                qtdComprada[idx]++;
+
+                int qtd = 0;
+                if (next_idx == -1) {
+                    qtd = saldo / precos[idx];
+                } else {
+                    int diff = valoresAtual[next_idx] - valoresAtual[idx];
+                    qtd = diff / precos[idx];
+                    if (qtd == 0) 
+                        qtd = 1; 
+                }
+                if (qtd > saldo / precos[idx]) {
+                    qtd = saldo / precos[idx];
+                }
+
+                if (qtd == 0) 
+                    break;
+                saldo -= qtd * precos[idx];
+                valoresAtual[idx] += qtd * precos[idx];
+                qtdComprada[idx] += qtd;
             }
 
             int totalAportado = 0;
