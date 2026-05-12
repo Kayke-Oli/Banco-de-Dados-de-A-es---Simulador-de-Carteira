@@ -41,11 +41,13 @@ int main() {
             for (int i = 0; i < carteira.tamanho(); i++) {
                 const Acao& a = carteira.get(i);
                 const CotacaoTicker* ct = cotacao.buscarTicker(a.ticker);
-                int preco;
-                if (operacao == "valorFast")
-                    preco = ct->buscaBinaria(data);
-                else
-                    preco = ct->buscaSequencial(data);
+                int preco = -1;
+                if (ct != nullptr) {
+                    if (operacao == "valorFast")
+                        preco = ct->buscaBinaria(data);
+                    else
+                        preco = ct->buscaSequencial(data);
+                }
                 int val = preco * a.quantidade;
                 valores.push_back(val);
                 total += val;
@@ -165,8 +167,10 @@ int main() {
             MyVec<int> precos;
             for (int i = 0; i < carteira.tamanho(); i++) {
                 const CotacaoTicker* ct = cotacao.buscarTicker(carteira.get(i).ticker);
-                precos.push_back(ct->buscaBinaria(data));
-            }
+                if (ct == nullptr)
+                    precos.push_back(-1);
+                else
+                    precos.push_back(ct->buscaBinaria(data));}
 
             MyVec<int> valoresAtual;
             for (int i = 0; i < carteira.tamanho(); i++)
