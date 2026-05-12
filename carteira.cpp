@@ -132,9 +132,9 @@ void Carteira::ordenar(const std::string& criterio) {
             return a.quantidade > b.quantidade;
         });
     } else if (criterio == "preco") {
-        _acoes.mergeSort([](const Acao& a, const Acao& b) {
-            return (long long)a.custoTotal * b.quantidade > (long long)b.custoTotal * a.quantidade;
-        });
+    _acoes.mergeSort([](const Acao& a, const Acao& b) {
+        return a.custoTotal > b.custoTotal;
+    });
     } else if (criterio == "dividendo") {
         _acoes.mergeSort([](const Acao& a, const Acao& b) {
             return a.dividendoAcumulado < b.dividendoAcumulado;
