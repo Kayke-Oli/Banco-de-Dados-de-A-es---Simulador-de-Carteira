@@ -83,23 +83,20 @@ int CotacaoTicker::ultimo(const Data &lastData) const
     return res;
 }
 
-// Busca o ticker no vetor; se não existir, cria e retorna ponteiro para ele
-CotacaoTicker *Cotacao::buscar_criar(const std::string &ticker)
+int Cotacao::buscar_criar(const std::string &ticker)
 {
     for (int i = 0; i < _tickers.size(); i++)
     {
         if (_tickers[i].get_ticker() == ticker)
-            return &_tickers[i];
+            return i;
     }
     _tickers.push_back(CotacaoTicker(ticker));
-    return &_tickers[_tickers.size() - 1];
+    return _tickers.size() - 1;
 }
 
 void Cotacao::ler(int n)
 {
-    _tickers.reserve(5000);
-    CotacaoTicker *ultimo = nullptr;
-
+    int ultimoIdx = -1;
     for (int i = 0; i < n; i++)
     {
         Data data;
@@ -107,18 +104,17 @@ void Cotacao::ler(int n)
         double preco;
         std::cin >> data >> ticker >> preco;
         int precoCentavos = preco * 100 + 0.5;
-        if (ultimo != nullptr && ultimo->get_ticker() == ticker)
+        if (ultimoIdx != -1 && _tickers[ultimoIdx].get_ticker() == ticker)
         {
-            ultimo->adicionar(data, precoCentavos);
+            _tickers[ultimoIdx].adicionar(data, precoCentavos);
         }
         else
         {
-            ultimo = buscar_criar(ticker);
-            ultimo->adicionar(data, precoCentavos);
+            ultimoIdx = buscar_criar(ticker);
+            _tickers[ultimoIdx].adicionar(data, precoCentavos);
         }
     }
 }
-
 // Ordena os registros de cada ticker por data
 void Cotacao::ordenarTodos()
 {

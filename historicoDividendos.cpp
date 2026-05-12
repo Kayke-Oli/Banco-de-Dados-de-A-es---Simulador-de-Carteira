@@ -87,21 +87,20 @@ int DividendoTicker::somatorio(const Data &inicio, const Data &fim) const
 HistoricoDividendo::HistoricoDividendo() {}
 
 // Busca o ticker no vetor; se não existir, cria e retorna ponteiro para ele
-DividendoTicker *HistoricoDividendo::buscar_criar(const std::string &ticker)
+int HistoricoDividendo::buscar_criar(const std::string &ticker)
 {
     for (int i = 0; i < _tickers.size(); i++)
     {
         if (_tickers[i].get_ticker() == ticker)
-            return &_tickers[i];
+            return i;
     }
     _tickers.push_back(DividendoTicker(ticker));
-    return &_tickers[_tickers.size() - 1];
+    return _tickers.size() - 1;
 }
 
 void HistoricoDividendo::ler(int n)
 {
-    _tickers.reserve(5000);
-    DividendoTicker *ultimo = nullptr;
+    int ultimoIdx = -1;
 
     for (int i = 0; i < n; i++)
     {
@@ -111,14 +110,14 @@ void HistoricoDividendo::ler(int n)
         std::cin >> data >> ticker >> valor;
         int valorCentavos = valor * 100 + 0.5;
 
-        if (ultimo != nullptr && ultimo->get_ticker() == ticker)
+        if (ultimoIdx != -1 && _tickers[ultimoIdx].get_ticker() == ticker)
         {
-            ultimo->adicionar(data, valorCentavos);
+            _tickers[ultimoIdx].adicionar(data, valorCentavos);
         }
         else
         {
-            ultimo = buscar_criar(ticker);
-            ultimo->adicionar(data, valorCentavos);
+            ultimoIdx = buscar_criar(ticker);
+            _tickers[ultimoIdx].adicionar(data, valorCentavos);
         }
     }
 }
