@@ -82,7 +82,6 @@ CotacaoTicker* Cotacao::buscar_criar(const std::string& ticker) {
 }
 
 void Cotacao::ler(int n) {
-    _tickers.reserve(n);
     CotacaoTicker* ultimo = nullptr; 
 
     for (int i = 0; i < n; i++) {

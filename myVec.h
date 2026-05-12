@@ -3,7 +3,6 @@
 #include <string>
 #include <cassert>
 
-
 //Excessao usada pela classe MyVec
 class MyVecException {
 private:
@@ -12,7 +11,6 @@ public:
 	MyVecException (const std::string &msg0): msg(msg0) { }
 	const std::string & what() const { return msg; }
 };
-
 
 template <class T>
 class MyVec{
@@ -23,15 +21,13 @@ private:
 
     void create();
     void destroy();
-     // Auxiliar recursivo do merge sort
     template <class Comparator>
-    void _mergeSortAux(int beg, int end, Comparator cmp);
+    void _mergeSortAux(int beg, int end, Comparator cmp, T* aux);
  
-    // Merge de dois subvetores ordenados
     template <class Comparator>
-    void _merge(int beg, int mid, int end, Comparator cmp);
+    void _merge(int beg, int mid, int end, Comparator cmp, T* aux);
 public:
-    typedef T* iterator;//define iterador
+    typedef T* iterator;
 
     iterator begin() {return _data;}
     const iterator begin() const {return _data;}
@@ -201,25 +197,25 @@ template <class Comparator>
 void MyVec<T>::mergeSort(Comparator cmp) {
     if (_dataSize <= 1) 
         return;
-    _mergeSortAux(0, _dataSize - 1, cmp);
+    T* aux = new T[_dataSize];
+    _mergeSortAux(0, _dataSize - 1, cmp, aux);
+    delete[] aux;
 }
  
 template <class T>
 template <class Comparator>
-void MyVec<T>::_mergeSortAux(int beg, int end, Comparator cmp) {
+void MyVec<T>::_mergeSortAux(int beg, int end, Comparator cmp, T* aux) {
     if (beg >= end) 
         return;
     int mid = beg + (end - beg)/2;
-    _mergeSortAux(beg, mid, cmp);
-    _mergeSortAux(mid + 1, end,  cmp);
-    _merge(beg, mid, end, cmp);
+    _mergeSortAux(beg, mid, cmp, aux);
+    _mergeSortAux(mid + 1, end,  cmp, aux);
+    _merge(beg, mid, end, cmp, aux);
 }
  
 template <class T>
 template <class Comparator>
-void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp) {
-    int tam = end - beg + 1;
-    T* aux = new T[tam];
+void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp, T* aux) {
     int i = beg, j = mid + 1, k = 0;
     while (i <= mid && j <= end) {
         if (cmp(_data[j], _data[i]))
@@ -231,8 +227,8 @@ void MyVec<T>::_merge(int beg, int mid, int end, Comparator cmp) {
         aux[k++] = _data[i++];
     while (j <= end)
         aux[k++] = _data[j++];
-    for (k = 0; k < tam; k++)
+    
+    for (k = 0; k < (end - beg + 1); k++)
         _data[beg + k] = aux[k];
-    delete[] aux;
 }
 #endif
