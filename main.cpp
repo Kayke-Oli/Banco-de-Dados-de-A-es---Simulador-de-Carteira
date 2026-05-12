@@ -176,7 +176,7 @@ int main() {
             int saldo = valorAporteD * 100 + 0.5;
 
             int tamOriginal = carteira.tamanho();
-            if (tamOriginal == 0) continue; 
+            if (tamOriginal == 0) continue; // Trava de segurança
 
             MyVec<int> precos;
             for (int i = 0; i < tamOriginal; i++) {
@@ -191,72 +191,36 @@ int main() {
             MyVec<int> valoresAtual;
             for (int i = 0; i < tamOriginal; i++) {
                 if (precos[i] <= 0) {
-                    valoresAtual.push_back(INF);
+                    valoresAtual.push_back(INF); // Cega ações sem preço no dia
                 } else {
                     valoresAtual.push_back(precos[i] * carteira.get(i).quantidade);
                 }
             }
 
             MyVec<int> qtdComprada(tamOriginal);
-            // NOVO LAÇO OTIMIZADO DE COMPRA EM LOTE (BULK BUY) - FINAL
+
+            // VOLTAMOS PARA A SUA LÓGICA ORIGINAL (1 POR 1)
+            // Como a memória já foi otimizada nos outros arquivos, isso vai rodar rápido!
             while (true) {
-                int minVal = -1;
-                int nextMinVal = -1;
                 int idx = -1;
-
-                // 1. Encontra o valor atual mais baixo da carteira
-                for (int i = 0; i < tamOriginal; i++) {
-                    if (precos[i] <= 0 || valoresAtual[i] == INF) continue;
-                    if (minVal == -1 || valoresAtual[i] < minVal) {
-                        minVal = valoresAtual[i];
-                    }
-                }
-
-                if (minVal == -1) break;
-
-                // 2. Encontra o PRÓXIMO valor estritamente maior e aplica o critério de desempate
                 for (int i = 0; i < tamOriginal; i++) {
                     if (precos[i] <= 0 || valoresAtual[i] == INF) continue;
 
-                    // Acha o próximo patamar de valor
-                    if (valoresAtual[i] > minVal) {
-                        if (nextMinVal == -1 || valoresAtual[i] < nextMinVal) {
-                            nextMinVal = valoresAtual[i];
-                        }
-                    }
-                    
-                    // Desempate por ordem alfabética para os que estão no menor valor
-                    if (valoresAtual[i] == minVal) {
-                        if (idx == -1 || carteira.get(i).ticker < carteira.get(idx).ticker) {
-                            idx = i;
-                        }
+                    if (idx == -1) {
+                        idx = i;
+                    } else if (valoresAtual[i] < valoresAtual[idx] || 
+                              (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
+                        idx = i;
                     }
                 }
-
-                // Condição de parada: dinheiro não paga a ação mais barata disponível
-                if (saldo < precos[idx]) break;
-
-                int qtd = 0;
-                if (nextMinVal == -1) {
-                    // Todas as ações estão no mesmo patamar, gasta o que der
-                    qtd = saldo / precos[idx];
-                } else {
-                    // Compra a quantidade exata para alcançar o próximo patamar sem ping-pong
-                    int diff = nextMinVal - minVal;
-                    qtd = diff / precos[idx];
-                    if (qtd == 0) qtd = 1; 
-                }
-
-                // Trava de segurança
-                if (qtd > saldo / precos[idx]) {
-                    qtd = saldo / precos[idx];
-                }
-
-                if (qtd == 0) break;
-
-                saldo -= qtd * precos[idx];
-                valoresAtual[idx] += qtd * precos[idx];
-                qtdComprada[idx] += qtd;
+                
+                // Condição de parada: saldo não paga a mais barata ou não há ações válidas
+                if (idx == -1 || saldo < precos[idx])
+                    break;
+                
+                saldo -= precos[idx];
+                valoresAtual[idx] += precos[idx];
+                qtdComprada[idx]++;
             }
 
             int totalAportado = 0;
@@ -264,7 +228,7 @@ int main() {
                 std::cout << "Dados do aporte:\n";
                 std::cout << std::left  << std::setw(7)  << "Ticker" << std::right << std::setw(10) << "Quantidade" << std::right << std::setw(14) << "Valor" << '\n';
             }
-
+            
             for (int i = 0; i < tamOriginal; i++) {
                 if (qtdComprada[i] == 0) 
                     continue;
@@ -272,12 +236,15 @@ int main() {
                 int valorCompra = qtdComprada[i] * precos[i];
                 totalAportado += valorCompra;
                 
+                // Aplica tudo na carteira de forma eficiente fora do laço
                 carteira.aporte(carteira.get(i).ticker, qtdComprada[i], precos[i]);
                 
                 if (!compacta) {
-                    std::cout << std::left  << std::setw(7)  << carteira.get(i).ticker << std::right << std::setw(10) << qtdComprada[i] << std::fixed << std::setprecision(2) << std::right << std::setw(14) << valorCompra / 100.0 << '\n';
+                    std::cout << std::left  << std::setw(7)  << carteira.get(i).ticker << std::right << std::setw(10) << qtdComprada[i]
+                              << std::fixed << std::setprecision(2) << std::right << std::setw(14) << valorCompra / 100.0 << '\n';
                 }
             }
+            
             if (!compacta) {
                 std::cout << std::left << std::setw(17) << "Total aportado:" << std::fixed << std::setprecision(2) << std::right << std::setw(14) << totalAportado / 100.0 << '\n';
                 if (mostrarCabecalhos) 
