@@ -74,27 +74,35 @@ int main() {
             Data inicio, fim;
             std::cin >> inicio >> fim;
 
-            const CotacaoTicker* ct0 = cotacao.buscarTicker(carteira.get(0).ticker);
-            int p = ct0->primeiro(inicio);
-            int u = ct0->ultimo(fim);
-
             int minVal = -1, maxVal = -1;
             Data minData, maxData;
 
-            for (int d = p; d <= u; d++) {
-                const Data& dataAtual = ct0->get_registro(d).data;
-                int totalDia = 0;
-                for (int i = 0; i < carteira.tamanho(); i++) {
-                    const Acao& a = carteira.get(i);
-                    const CotacaoTicker* ct = cotacao.buscarTicker(a.ticker);
-                    int preco = ct->buscaBinaria(dataAtual);
-                    totalDia += preco * a.quantidade;
+            // Usa o primeiro ticker que tiver cotações no intervalo como referência de datas
+            for (int i = 0; i < carteira.tamanho(); i++) {
+                const CotacaoTicker* ct0 = cotacao.buscarTicker(carteira.get(i).ticker);
+                if (ct0 == nullptr) continue;
+                int p = ct0->primeiro(inicio);
+                int u = ct0->ultimo(fim);
+                if (p > u) continue;
+
+                for (int d = p; d <= u; d++) {
+                    const Data& dataAtual = ct0->get_registro(d).data;
+                    int totalDia = 0;
+                    bool valido = true;
+                    for (int j = 0; j < carteira.tamanho(); j++) {
+                        const Acao& a = carteira.get(j);
+                        const CotacaoTicker* ct = cotacao.buscarTicker(a.ticker);
+                        if (ct == nullptr) { valido = false; break; }
+                        int preco = ct->buscaBinaria(dataAtual);
+                        if (preco == -1) { valido = false; break; }
+                        totalDia += preco * a.quantidade;
+                    }
+                    if (!valido) continue;
+                    if (minVal == -1 || totalDia < minVal) { minVal = totalDia; minData = dataAtual; }
+                    if (maxVal == -1 || totalDia > maxVal) { maxVal = totalDia; maxData = dataAtual; }
                 }
-                if (minVal == -1 || totalDia < minVal) { 
-                    minVal = totalDia; minData = dataAtual; }
-                if (maxVal == -1 || totalDia > maxVal) { 
-                    maxVal = totalDia; maxData = dataAtual; }
-            }
+                break; // usou o primeiro ticker válido como referência
+            }   
 
             if (compacta) {
                 std::cout << std::fixed << std::setprecision(2) << minVal / 100.0 << '\n' << maxVal / 100.0 << '\n';
@@ -103,8 +111,7 @@ int main() {
                     std::cout << "Minimos e maximos no intervalo: " << inicio << " a " << fim << '\n';
                 std::cout << "Valor minimo no dia " << minData << ":" << std::fixed << std::setprecision(2) << std::right << std::setw(14) << minVal / 100.0 << '\n';
                 std::cout << "Valor maximo no dia " << maxData << ":" << std::fixed << std::setprecision(2) << std::right << std::setw(14) << maxVal / 100.0 << '\n';
-                if (mostrarCabecalhos) 
-                    std::cout << '\n';
+                if (mostrarCabecalhos) std::cout << '\n';
             }
         }
         else if (operacao == "dividendo") {
