@@ -16,6 +16,7 @@ Acao* Carteira::buscar(const std::string& ticker){
 
 // Lê n ações: ticker quantidade custoTotal dividendoAcumulado
 void Carteira::ler(int n) {
+    _acoes.reserve(n);
     for (int i = 0; i < n; i++) {
         Acao a;
         double custo, dividendo;

@@ -198,41 +198,62 @@ int main() {
             }
 
             MyVec<int> qtdComprada(tamOriginal);
+            // NOVO LAÇO OTIMIZADO DE COMPRA EM LOTE (BULK BUY) - FINAL
             while (true) {
+                int minVal = -1;
+                int nextMinVal = -1;
                 int idx = -1;
-                int next_idx = -1;
+
+                // 1. Encontra o valor atual mais baixo da carteira
                 for (int i = 0; i < tamOriginal; i++) {
-                    if (precos[i] <= 0 || valoresAtual[i] == INF)
-                        continue;
-                    if (idx == -1) {
-                        idx = i;
-                    } else if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
-                        next_idx = idx;
-                        idx = i;
-                    } else if (next_idx == -1) {
-                        next_idx = i;
-                    } else if (valoresAtual[i] < valoresAtual[next_idx] || (valoresAtual[i] == valoresAtual[next_idx] && carteira.get(i).ticker < carteira.get(next_idx).ticker)) {
-                        next_idx = i;
+                    if (precos[i] <= 0 || valoresAtual[i] == INF) continue;
+                    if (minVal == -1 || valoresAtual[i] < minVal) {
+                        minVal = valoresAtual[i];
                     }
                 }
-                if (idx == -1 || saldo < precos[idx])
-                    break;
+
+                if (minVal == -1) break;
+
+                // 2. Encontra o PRÓXIMO valor estritamente maior e aplica o critério de desempate
+                for (int i = 0; i < tamOriginal; i++) {
+                    if (precos[i] <= 0 || valoresAtual[i] == INF) continue;
+
+                    // Acha o próximo patamar de valor
+                    if (valoresAtual[i] > minVal) {
+                        if (nextMinVal == -1 || valoresAtual[i] < nextMinVal) {
+                            nextMinVal = valoresAtual[i];
+                        }
+                    }
+                    
+                    // Desempate por ordem alfabética para os que estão no menor valor
+                    if (valoresAtual[i] == minVal) {
+                        if (idx == -1 || carteira.get(i).ticker < carteira.get(idx).ticker) {
+                            idx = i;
+                        }
+                    }
+                }
+
+                // Condição de parada: dinheiro não paga a ação mais barata disponível
+                if (saldo < precos[idx]) break;
 
                 int qtd = 0;
-                if (next_idx == -1) {
+                if (nextMinVal == -1) {
+                    // Todas as ações estão no mesmo patamar, gasta o que der
                     qtd = saldo / precos[idx];
                 } else {
-                    int diff = valoresAtual[next_idx] - valoresAtual[idx];
+                    // Compra a quantidade exata para alcançar o próximo patamar sem ping-pong
+                    int diff = nextMinVal - minVal;
                     qtd = diff / precos[idx];
-                    if (qtd == 0) 
-                        qtd = 1; 
+                    if (qtd == 0) qtd = 1; 
                 }
+
+                // Trava de segurança
                 if (qtd > saldo / precos[idx]) {
                     qtd = saldo / precos[idx];
                 }
 
-                if (qtd == 0) 
-                    break;
+                if (qtd == 0) break;
+
                 saldo -= qtd * precos[idx];
                 valoresAtual[idx] += qtd * precos[idx];
                 qtdComprada[idx] += qtd;

@@ -82,13 +82,21 @@ CotacaoTicker* Cotacao::buscar_criar(const std::string& ticker) {
 }
 
 void Cotacao::ler(int n) {
+    _tickers.reserve(n);
+    CotacaoTicker* ultimo = nullptr; 
+
     for (int i = 0; i < n; i++) {
         Data data;
         std::string ticker;
         double preco;
         std::cin >> data >> ticker >> preco;
-        int precoCentavos = preco * 100 + 0.5; // arredonda para centavos
-        buscar_criar(ticker)->adicionar(data, precoCentavos);
+        int precoCentavos = preco * 100 + 0.5;
+        if (ultimo != nullptr && ultimo->get_ticker() == ticker) {
+            ultimo->adicionar(data, precoCentavos);
+        } else {
+            ultimo = buscar_criar(ticker);
+            ultimo->adicionar(data, precoCentavos);
+        }
     }
 }
 

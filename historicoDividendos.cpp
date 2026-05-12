@@ -84,13 +84,22 @@ DividendoTicker* HistoricoDividendo::buscar_criar(const std::string& ticker) {
 }
 
 void HistoricoDividendo::ler(int n) {
+    _tickers.reserve(n); 
+    DividendoTicker* ultimo = nullptr;
+
     for (int i = 0; i < n; i++) {
         Data data;
         std::string ticker;
         double valor;
         std::cin >> data >> ticker >> valor;
-        int valorCentavos = valor * 100 + 0.5; // arredonda para centavos
-        buscar_criar(ticker)->adicionar(data, valorCentavos);
+        int valorCentavos = valor * 100 + 0.5;
+
+        if (ultimo != nullptr && ultimo->get_ticker() == ticker) {
+            ultimo->adicionar(data, valorCentavos);
+        } else {
+            ultimo = buscar_criar(ticker);
+            ultimo->adicionar(data, valorCentavos);
+        }
     }
 }
 
