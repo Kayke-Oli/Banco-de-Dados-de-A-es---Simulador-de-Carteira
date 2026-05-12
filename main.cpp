@@ -31,6 +31,13 @@ int main() {
     bool mostrarCabecalhos = (formato == "mostrarCabecalhos");
     bool compacta = (formato == "compacta");
 
+    MyVec<const CotacaoTicker*> cacheCot;
+    MyVec<const DividendoTicker*> cacheDiv;
+    for (int i = 0; i < carteira.tamanho(); i++) {
+    cacheCot.push_back(cotacao.buscarTicker(carteira.get(i).ticker));
+    cacheDiv.push_back(historico.buscarTicker(carteira.get(i).ticker));
+    }
+
     std::string operacao;
     while (std::cin >> operacao) {
         if (operacao == "valor" || operacao == "valorFast") {
@@ -42,7 +49,7 @@ int main() {
 
             for (int i = 0; i < carteira.tamanho(); i++) {
                 const Acao& a = carteira.get(i);
-                const CotacaoTicker* ct = cotacao.buscarTicker(a.ticker);
+                const CotacaoTicker* ct = cacheCot[i];
                 int preco = -1;
                 if (ct != nullptr) {
                     if (operacao == "valorFast")
@@ -81,15 +88,9 @@ int main() {
             int minVal = -1, maxVal = -1;
             Data minData, maxData;
 
-            MyVec<const CotacaoTicker*> cache_ct;
-            for (int j = 0; j < carteira.tamanho(); j++) {
-                cache_ct.push_back(cotacao.buscarTicker(carteira.get(j).ticker));
-            }
-
             for (int i = 0; i < carteira.tamanho(); i++) {
-                const CotacaoTicker* ct0 = cache_ct[i];
-                if (ct0 == nullptr) 
-                    continue;
+                const CotacaoTicker* ct0 = cacheCot[i];
+                if (ct0 == nullptr) continue;
                 int p = ct0->primeiro(inicio);
                 int u = ct0->ultimo(fim);
                 if (p > u) continue;
@@ -99,20 +100,16 @@ int main() {
                     int totalDia = 0;
                     bool valido = true;
                     for (int j = 0; j < carteira.tamanho(); j++) {
-                        const CotacaoTicker* ct = cache_ct[j];
-                        if (ct == nullptr) { 
-                            valido = false; break; }
+                        const Acao& a = carteira.get(j);
+                        const CotacaoTicker* ct = cacheCot[j];
+                        if (ct == nullptr) { valido = false; break; }
                         int preco = ct->buscaBinaria(dataAtual);
-                        if (preco == -1) { 
-                            valido = false; break; }
-                        totalDia += preco * carteira.get(j).quantidade;
+                        if (preco == -1) { valido = false; break; }
+                        totalDia += preco * a.quantidade;
                     }
-                    if (!valido) 
-                        continue;
-                    if (minVal == -1 || totalDia < minVal) { 
-                        minVal = totalDia; minData = dataAtual; }
-                    if (maxVal == -1 || totalDia > maxVal) { 
-                        maxVal = totalDia; maxData = dataAtual; }
+                    if (!valido) continue;
+                    if (minVal == -1 || totalDia < minVal) { minVal = totalDia; minData = dataAtual; }
+                    if (maxVal == -1 || totalDia > maxVal) { maxVal = totalDia; maxData = dataAtual; }
                 }
                 break; 
             }   
@@ -136,7 +133,7 @@ int main() {
 
             for (int i = 0; i < carteira.tamanho(); i++) {
                 const Acao& a = carteira.get(i);
-                const DividendoTicker* dt = historico.buscarTicker(a.ticker);
+                const DividendoTicker* dt = cacheDiv[i];
                 int soma = 0;
                 if (dt != nullptr)
                     soma = dt->somatorio(inicio, fim) * a.quantidade;
@@ -168,6 +165,12 @@ int main() {
             std::string criterio;
             std::cin >> criterio;
             carteira.ordenar(criterio);
+            cacheCot.clear();
+            cacheDiv.clear();
+            for (int i = 0; i < carteira.tamanho(); i++) {
+                cacheCot.push_back(cotacao.buscarTicker(carteira.get(i).ticker));
+                cacheDiv.push_back(historico.buscarTicker(carteira.get(i).ticker));
+            }
         }
         else if (operacao == "aporte") {
             Data data;
@@ -176,11 +179,11 @@ int main() {
             int saldo = valorAporteD * 100 + 0.5;
 
             int tamOriginal = carteira.tamanho();
-            if (tamOriginal == 0) continue; // Trava de segurança
+            if (tamOriginal == 0) continue;
 
             MyVec<int> precos;
             for (int i = 0; i < tamOriginal; i++) {
-                const CotacaoTicker* ct = cotacao.buscarTicker(carteira.get(i).ticker);
+                const CotacaoTicker* ct = cacheCot[i];
                 if (ct == nullptr)
                     precos.push_back(-1);
                 else
@@ -191,7 +194,7 @@ int main() {
             MyVec<int> valoresAtual;
             for (int i = 0; i < tamOriginal; i++) {
                 if (precos[i] <= 0) {
-                    valoresAtual.push_back(INF); // Cega ações sem preço no dia
+                    valoresAtual.push_back(INF);
                 } else {
                     valoresAtual.push_back(precos[i] * carteira.get(i).quantidade);
                 }
@@ -199,28 +202,49 @@ int main() {
 
             MyVec<int> qtdComprada(tamOriginal);
 
-            // VOLTAMOS PARA A SUA LÓGICA ORIGINAL (1 POR 1)
-            // Como a memória já foi otimizada nos outros arquivos, isso vai rodar rápido!
             while (true) {
                 int idx = -1;
+                int minVal = -1;
+
                 for (int i = 0; i < tamOriginal; i++) {
                     if (precos[i] <= 0 || valoresAtual[i] == INF) continue;
 
-                    if (idx == -1) {
+                    if (idx == -1 || valoresAtual[i] < minVal || 
+                       (valoresAtual[i] == minVal && carteira.get(i).ticker < carteira.get(idx).ticker)) {
                         idx = i;
-                    } else if (valoresAtual[i] < valoresAtual[idx] || 
-                              (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
-                        idx = i;
+                        minVal = valoresAtual[i];
                     }
                 }
                 
-                // Condição de parada: saldo não paga a mais barata ou não há ações válidas
-                if (idx == -1 || saldo < precos[idx])
+                if (idx == -1 || saldo < precos[idx]) 
                     break;
-                
-                saldo -= precos[idx];
-                valoresAtual[idx] += precos[idx];
-                qtdComprada[idx]++;
+                int nextMinVal = -1;
+                for (int i = 0; i < tamOriginal; i++) {
+                    if (precos[i] <= 0 || valoresAtual[i] == INF || i == idx) continue;
+                    if (valoresAtual[i] >= minVal) {
+                        if (nextMinVal == -1 || valoresAtual[i] < nextMinVal) {
+                            nextMinVal = valoresAtual[i];
+                        }
+                    }
+                }
+               
+                int qtd = 1; 
+                if (nextMinVal != -1 && nextMinVal > minVal) {
+                    qtd = (nextMinVal - minVal) / precos[idx];
+                    if (qtd == 0) qtd = 1;
+                } else if (nextMinVal == -1) {
+                    qtd = saldo / precos[idx];
+                }
+
+                if (qtd > saldo / precos[idx]) {
+                    qtd = saldo / precos[idx];
+                }
+
+                if (qtd <= 0) 
+                    break;
+                saldo -= qtd * precos[idx];
+                valoresAtual[idx] += qtd * precos[idx];
+                qtdComprada[idx] += qtd;
             }
 
             int totalAportado = 0;
@@ -230,13 +254,10 @@ int main() {
             }
             
             for (int i = 0; i < tamOriginal; i++) {
-                if (qtdComprada[i] == 0) 
-                    continue;
+                if (qtdComprada[i] == 0) continue;
                 
                 int valorCompra = qtdComprada[i] * precos[i];
                 totalAportado += valorCompra;
-                
-                // Aplica tudo na carteira de forma eficiente fora do laço
                 carteira.aporte(carteira.get(i).ticker, qtdComprada[i], precos[i]);
                 
                 if (!compacta) {
@@ -245,10 +266,15 @@ int main() {
                 }
             }
             
+            while (cacheCot.size() < carteira.tamanho()) {
+                int novoIdx = cacheCot.size();
+                cacheCot.push_back(cotacao.buscarTicker(carteira.get(novoIdx).ticker));
+                cacheDiv.push_back(historico.buscarTicker(carteira.get(novoIdx).ticker));
+            }
+
             if (!compacta) {
                 std::cout << std::left << std::setw(17) << "Total aportado:" << std::fixed << std::setprecision(2) << std::right << std::setw(14) << totalAportado / 100.0 << '\n';
-                if (mostrarCabecalhos) 
-                    std::cout << '\n';
+                if (mostrarCabecalhos) std::cout << '\n';
             } else {
                 std::cout << std::fixed << std::setprecision(2) << totalAportado / 100.0 << '\n';
             }
