@@ -81,10 +81,15 @@ int main() {
             int minVal = -1, maxVal = -1;
             Data minData, maxData;
 
-            // Usa o primeiro ticker que tiver cotações no intervalo como referência de datas
+            MyVec<const CotacaoTicker*> cache_ct;
+            for (int j = 0; j < carteira.tamanho(); j++) {
+                cache_ct.push_back(cotacao.buscarTicker(carteira.get(j).ticker));
+            }
+
             for (int i = 0; i < carteira.tamanho(); i++) {
-                const CotacaoTicker* ct0 = cotacao.buscarTicker(carteira.get(i).ticker);
-                if (ct0 == nullptr) continue;
+                const CotacaoTicker* ct0 = cache_ct[i];
+                if (ct0 == nullptr) 
+                    continue;
                 int p = ct0->primeiro(inicio);
                 int u = ct0->ultimo(fim);
                 if (p > u) continue;
@@ -94,16 +99,20 @@ int main() {
                     int totalDia = 0;
                     bool valido = true;
                     for (int j = 0; j < carteira.tamanho(); j++) {
-                        const Acao& a = carteira.get(j);
-                        const CotacaoTicker* ct = cotacao.buscarTicker(a.ticker);
-                        if (ct == nullptr) { valido = false; break; }
+                        const CotacaoTicker* ct = cache_ct[j];
+                        if (ct == nullptr) { 
+                            valido = false; break; }
                         int preco = ct->buscaBinaria(dataAtual);
-                        if (preco == -1) { valido = false; break; }
-                        totalDia += preco * a.quantidade;
+                        if (preco == -1) { 
+                            valido = false; break; }
+                        totalDia += preco * carteira.get(j).quantidade;
                     }
-                    if (!valido) continue;
-                    if (minVal == -1 || totalDia < minVal) { minVal = totalDia; minData = dataAtual; }
-                    if (maxVal == -1 || totalDia > maxVal) { maxVal = totalDia; maxData = dataAtual; }
+                    if (!valido) 
+                        continue;
+                    if (minVal == -1 || totalDia < minVal) { 
+                        minVal = totalDia; minData = dataAtual; }
+                    if (maxVal == -1 || totalDia > maxVal) { 
+                        maxVal = totalDia; maxData = dataAtual; }
                 }
                 break; 
             }   
@@ -166,32 +175,39 @@ int main() {
             std::cin >> data >> valorAporteD;
             int saldo = valorAporteD * 100 + 0.5;
 
+            int tamOriginal = carteira.tamanho();
+            if (tamOriginal == 0) continue; // Trava contra KILL SIGNAL se a carteira for vazia
+
             MyVec<int> precos;
-            for (int i = 0; i < carteira.tamanho(); i++) {
+            for (int i = 0; i < tamOriginal; i++) {
                 const CotacaoTicker* ct = cotacao.buscarTicker(carteira.get(i).ticker);
                 if (ct == nullptr)
                     precos.push_back(-1);
                 else
-                    precos.push_back(ct->buscaBinaria(data));}
+                    precos.push_back(ct->buscaBinaria(data));
+            }
 
+            const int INF = 2000000000;
             MyVec<int> valoresAtual;
-            for (int i = 0; i < carteira.tamanho(); i++)
-                valoresAtual.push_back(precos[i] * carteira.get(i).quantidade);
+            for (int i = 0; i < tamOriginal; i++) {
+                if (precos[i] <= 0) {
+                    valoresAtual.push_back(INF); // Cega o algoritmo para não comprar ações sem cotação
+                } else {
+                    valoresAtual.push_back(precos[i] * carteira.get(i).quantidade);
+                }
+            }
 
-            MyVec<int> qtdComprada(carteira.tamanho());
-
-            int tamOriginal = carteira.tamanho();
-            if (tamOriginal == 0) 
-                continue; 
+            MyVec<int> qtdComprada(tamOriginal);
 
             while (true) {
                 int idx = 0;
-                for (int i = 1; i < carteira.tamanho(); i++) { 
+                for (int i = 1; i < tamOriginal; i++) {
                     if (valoresAtual[i] < valoresAtual[idx] || (valoresAtual[i] == valoresAtual[idx] && carteira.get(i).ticker < carteira.get(idx).ticker)) {
                         idx = i;
                     }
                 }
-                if (saldo < precos[idx] || precos[idx] <= 0)
+                // Se o menor valor encontrado for INF, significa que não há ações válidas para comprar
+                if (saldo < precos[idx] || precos[idx] <= 0 || valoresAtual[idx] == INF)
                     break;
                 
                 saldo -= precos[idx];
