@@ -105,7 +105,7 @@ int main() {
                     if (minVal == -1 || totalDia < minVal) { minVal = totalDia; minData = dataAtual; }
                     if (maxVal == -1 || totalDia > maxVal) { maxVal = totalDia; maxData = dataAtual; }
                 }
-                break; // usou o primeiro ticker válido como referência
+                break; 
             }   
 
             if (compacta) {
